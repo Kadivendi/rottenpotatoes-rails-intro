@@ -8,6 +8,20 @@ class MoviesController < ApplicationController
 
   def index
     @movies = Movie.all
+    # Get params
+    sort_values = params[:sort_values]
+    # switching cases based on URL params
+    case sort_values
+    when "release_date"
+      @movies = Movie.order(:release_date)
+      @sort_values = "release_date"
+    when "movies_title"
+      @movies = Movie.order(:title)
+      @sort_values = "movies_title"
+    else
+      @movies = Movie.all
+      @sort_values = ''
+    end
   end
 
   def new
