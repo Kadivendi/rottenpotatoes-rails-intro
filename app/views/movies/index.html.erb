@@ -2,6 +2,21 @@
 <h2>All Movies</h2>
 
 <%#  Part 1: Start here... %>
+<!-- Checkboxes and refresh button -->
+<%= form_tag movies_path, method: :get, id: 'ratings_form', autocomplete: 'off' do %>
+  Include:
+  <% @total_ratings.each do |rating| %>
+    <div class="form-check  form-check-inline">
+      <%= label_tag "ratings[#{rating}]", rating, class: 'form-check-label' %>
+      &nbsp;
+      <%= check_box_tag "ratings[#{rating}]", "1",  @ratings_to_show.include?(rating), class: 'form-check-input', id: "ratings_#{rating}" %>
+    </div>
+  <% end %>
+  <%= hidden_field_tag :r_clicked, true %>
+  <%= submit_tag 'Refresh', id: 'ratings_submit', class: 'btn btn-primary' %>
+<% end %>
+&nbsp;
+
 
 <table class="table table-striped col-md-12" id="movies">
   <thead>
@@ -13,7 +28,7 @@
     </tr>
   </thead>
   <tbody>
-    <% @movies.each do |movie| %>
+    <% @movie_titles.each do |movie| %>
       <tr>
         <td>
           <%= movie.title %>

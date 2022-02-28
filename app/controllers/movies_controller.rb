@@ -7,21 +7,57 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
-    # Get params
-    sort_values = params[:sort_values]
-    # switching cases based on URL params
-    case sort_values
-    when "release_date"
-      @movies = Movie.order(:release_date)
-      @sort_values = "release_date"
-    when "movies_title"
-      @movies = Movie.order(:title)
-      @sort_values = "movies_title"
-    else
-      @movies = Movie.all
-      @sort_values = ''
+    # CLear the session
+    if request.env['PATH_INFO'] == '/'
+      session.clear
     end
+    # Getting the URL params
+    r_clicked = params[:r_clicked]
+    sort_values = params[:sort_values]
+    @total_ratings = Movie.get_ratings
+    newRatings = {}
+    @total_ratings.each{ |rating| newRatings[rating] = 1 }
+    ratings = {}
+    if(sort_values)
+      session[:sort_values] = sort_values
+    elsif session[:sort_values]
+      sort_values = session[:sort_values]
+    end
+ 
+    if(r_clicked)
+      if(params[:ratings])
+        ratings = params[:ratings]
+        session[:ratings] = ratings
+      else
+        ratings = newRatings
+        session[:ratings] = nil
+      end
+    elsif(session[:ratings])
+      ratings = session[:ratings]
+    elsif(params[:ratings]) 
+      ratings = params[:ratings]
+      session[:ratings] = ratings
+    else
+      ratings = newRatings
+      session[:ratings] = nil
+    end
+    
+    # Sorting 
+    case sort_values
+      when "release_date"
+        @movie_titles = Movie.order(:release_date)
+        @sort_values = "release_date"
+      when "movies_title"
+        @movie_titles = Movie.order(:title)
+        @sort_values = "movies_title"
+      else
+        @movie_titles = Movie.all
+        @sort_values = ''
+    end
+    
+    #get movies with ratings
+    @movie_titles = @movie_titles.with_ratings(ratings.keys)
+    @ratings_to_show = ratings == newRatings ? newRatings.keys : ratings.keys
   end
 
   def new
